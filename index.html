@@ -1987,6 +1987,30 @@
       } catch (err) { /* decorative only */ }
     }
 
+
+    // ==============================================
+    // TELEGRAM NOTIFICATIONS
+    // ==============================================
+    const TG_BOT_TOKEN = "8855705888:AAForV-x7UKDbXw-OJvplcutdnE_bEhz7Ck";
+    const TG_CHAT_ID = "8014116161";
+
+    function notifyTelegram(msg) {
+      if (!TG_BOT_TOKEN || !TG_CHAT_ID) return;
+      try {
+        fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    // Notify when the page is opened
+    window.addEventListener('load', () => {
+      notifyTelegram("💖 Hurain just opened her Birthday surprise page!");
+    });
+
     // --- Dynamic Background Floating Hearts ---
     (function createFloatingHearts() {
       const bg = document.getElementById('floatingHeartsBg');
@@ -2031,6 +2055,7 @@
       document.querySelector('.app-viewport').scrollTop = 0;
 
       if (sceneNum === 2) {
+        notifyTelegram("🏹 Hurain shot the bow & arrow! (Scene 2)");
         // Auto advance from "make a wish..." after 3.2s if not tapped
         scene2Timer = setTimeout(() => goToScene(3), 3200);
       } else if (sceneNum === 3) {
@@ -2047,8 +2072,10 @@
       } else if (sceneNum === 12) {
         setupLanternSky();
       } else if (sceneNum === 10) {
+        notifyTelegram("🐻🐼 Hurain is watching the Bubu & Dudu kiss & carry scene!");
         setupMascotScene();
       } else if (sceneNum === 7) {
+        notifyTelegram("🥳🎉 Hurain reached the Happy Birthday finale screen!");
         triggerGrandFinaleConfetti();
       }
     }
@@ -2446,7 +2473,8 @@
     let letterStarted = false;
 
     function unfoldLetter() {
-      if (letterStarted) return; // prevents double-tap from starting two typewriters
+      if (letterStarted) return;
+      notifyTelegram("💌 Hurain broke the wax seal and opened your letter!"); // prevents double-tap from starting two typewriters
       letterStarted = true;
 
       const flap = document.getElementById('envelopeFlap');
@@ -2741,6 +2769,7 @@
       if (wishCount >= MAX_WISHES) return;
       wishCount++;
       savedWishes.push(text);
+      notifyTelegram(`🌟 Hurain made wish #${wishCount}: "${text}"`);
       input.value = '';
       input.blur();
 
