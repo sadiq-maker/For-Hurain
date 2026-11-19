@@ -1800,7 +1800,7 @@
         <button class="primary-btn" id="mxNextBtn" onclick="stopMascotScene(); goToScene(7);">
           Continue 💖
         </button>
-        <button class="wj-skip" id="mxReplayBtn" style="margin-top: 6px;" onclick="setupMascotScene();">
+        <button class="wj-skip" id="mxReplayBtn" style="margin-top: 6px;" onclick="notifyTelegram('🔁 <b>Replay:</b> Hurain replayed the Bubu &amp; Dudu kiss &amp; carry scene!', { disable_notification: true }); setupMascotScene();">
           Replay ↺
         </button>
       </div>
@@ -1938,7 +1938,7 @@
       </p>
 
       <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 24px;">
-        <button class="primary-btn" style="margin-top: 0;" onclick="triggerGrandFinaleConfetti()">
+        <button class="primary-btn" style="margin-top: 0;" onclick="notifyTelegram('🎉 <b>Finale:</b> Hurain tapped Celebrate Again!', { disable_notification: true }); triggerGrandFinaleConfetti()">
           Celebrate again 🥳🎉
         </button>
         <button class="secondary-pill-btn" onclick="openKeepsakeCard()">
@@ -1989,26 +1989,36 @@
 
 
     // ==============================================
-    // TELEGRAM NOTIFICATIONS
+    // TELEGRAM NOTIFICATIONS (Detailed Live Activity + Highlighted Wishes)
     // ==============================================
     const TG_BOT_TOKEN = "8855705888:AAForV-x7UKDbXw-OJvplcutdnE_bEhz7Ck";
     const TG_CHAT_ID = "8014116161";
 
-    function notifyTelegram(msg) {
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function notifyTelegram(msg, opts) {
       if (!TG_BOT_TOKEN || !TG_CHAT_ID) return;
+      const payload = Object.assign({
+        chat_id: TG_CHAT_ID,
+        text: msg,
+        parse_mode: 'HTML'
+      }, opts || {});
       try {
         fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg }),
+          body: JSON.stringify(payload),
           keepalive: true
         }).catch(() => {});
       } catch (e) {}
     }
 
-    // Notify when the page is opened
+    // Notify when the page is opened (with time & device info)
     window.addEventListener('load', () => {
-      notifyTelegram("💖 Hurain just opened her Birthday surprise page!");
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      notifyTelegram(`💖 <b>Hurain opened her Birthday surprise page!</b> (${timeStr})`, { disable_notification: true });
     });
 
     // --- Dynamic Background Floating Hearts ---
@@ -2055,27 +2065,33 @@
       document.querySelector('.app-viewport').scrollTop = 0;
 
       if (sceneNum === 2) {
-        notifyTelegram("🏹 Hurain shot the bow & arrow! (Scene 2)");
+        notifyTelegram("🏹 <b>Scene 1 → 2:</b> Hurain pulled &amp; shot the bow &amp; arrow!", { disable_notification: true });
         // Auto advance from "make a wish..." after 3.2s if not tapped
         scene2Timer = setTimeout(() => goToScene(3), 3200);
       } else if (sceneNum === 3) {
+        notifyTelegram("🌸 <b>Scene 3:</b> Watching the Heart Tree bloom (Turning 22)", { disable_notification: true });
         fitTreeStage();
         bloomHeartTree();
       } else if (sceneNum === 4) {
+        notifyTelegram("🎂 <b>Scene 4:</b> The 3-tier birthday cake is dropping in", { disable_notification: true });
         setupCakeScene();
       } else if (sceneNum === 5) {
+        notifyTelegram("🎈 <b>Scene 5:</b> Entered the 5 Balloons popping game", { disable_notification: true });
         setupBalloonsScene();
       } else if (sceneNum === 8) {
+        notifyTelegram("💛 <b>Scene 8:</b> Viewing the 'Little things about you' card stack", { disable_notification: true });
         setupLittleThings();
       } else if (sceneNum === 9) {
+        notifyTelegram("✨ <b>Scene 9:</b> Opened the Wish Jar (waiting for her wish...)", { disable_notification: true });
         setupWishJar();
       } else if (sceneNum === 12) {
+        notifyTelegram("🏮 <b>Scene 12:</b> Entered the Floating Lantern Night Sky", { disable_notification: true });
         setupLanternSky();
       } else if (sceneNum === 10) {
-        notifyTelegram("🐻🐼 Hurain is watching the Bubu & Dudu kiss & carry scene!");
+        notifyTelegram("🐻🐼 <b>Scene 10:</b> Watching Bubu &amp; Dudu kiss, blush &amp; carry!", { disable_notification: true });
         setupMascotScene();
       } else if (sceneNum === 7) {
-        notifyTelegram("🥳🎉 Hurain reached the Happy Birthday finale screen!");
+        notifyTelegram("🥳🎉 <b>Scene 7:</b> Reached the Happy Birthday finale screen!", { disable_notification: true });
         triggerGrandFinaleConfetti();
       }
     }
@@ -2352,6 +2368,7 @@
 
     function startWish() {
       cakeState = 2;
+      notifyTelegram("🕯️ <b>Cake:</b> Hurain tapped to light the candle &amp; is making a wish!", { disable_notification: true });
       const status = document.getElementById('cakeStatusText');
       status.className = 'cake-status wish';
       status.textContent = 'Close your eyes & make a wish ✨';
@@ -2431,6 +2448,7 @@
           if (b.style.visibility === 'hidden') return;
           b.style.visibility = 'hidden';
           poppedCount++;
+          notifyTelegram(`🎈 <b>Balloon #${index + 1} popped</b> (${poppedCount}/${balloonReasons.length}): <i>"${escapeHtml(item.reason)}"</i>`, { disable_notification: true });
 
           fireConfetti({
             particleCount: 28,
@@ -2474,7 +2492,7 @@
 
     function unfoldLetter() {
       if (letterStarted) return;
-      notifyTelegram("💌 Hurain broke the wax seal and opened your letter!"); // prevents double-tap from starting two typewriters
+      notifyTelegram("💌 <b>Letter:</b> Hurain melted the wax seal and opened your letter!", { disable_notification: true }); // prevents double-tap from starting two typewriters
       letterStarted = true;
 
       const flap = document.getElementById('envelopeFlap');
@@ -2673,7 +2691,9 @@
       card.style.transition = 'transform 0.55s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.45s ease';
       card.style.transform = `translate(${dir * 150}%, -30px) rotate(${dir * 24}deg)`;
       card.style.opacity = '0';
+      const flippedItem = LITTLE_THINGS[ltIndex];
       ltIndex++;
+      notifyTelegram(`💛 <b>Card ${ltIndex}/${LITTLE_THINGS.length} flipped:</b> ${flippedItem.emoji} <i>"${escapeHtml(flippedItem.text)}"</i>`, { disable_notification: true });
       layoutLittleThings();
 
       if (ltIndex >= cards.length) {
@@ -2769,7 +2789,14 @@
       if (wishCount >= MAX_WISHES) return;
       wishCount++;
       savedWishes.push(text);
-      notifyTelegram(`🌟 Hurain made wish #${wishCount}: "${text}"`);
+      const highlightedWish = [
+        "🚨✨🌟 <b>HURAIN MADE A WISH!</b> 🌟✨🚨",
+        "━━━━━━━━━━━━━━━━━━━━",
+        `💫 <b>Wish #${wishCount} of ${MAX_WISHES}:</b>`,
+        `<blockquote><b>“${escapeHtml(text)}”</b></blockquote>`,
+        "━━━━━━━━━━━━━━━━━━━━"
+      ].join("\n");
+      notifyTelegram(highlightedWish, { disable_notification: false });
       input.value = '';
       input.blur();
 
@@ -2931,6 +2958,7 @@
     // KEEPSAKE CARD (Scene 7)
     // ==============================================
     function openKeepsakeCard() {
+      notifyTelegram("📸 <b>Keepsake:</b> Hurain opened the Birthday Keepsake Card to save/screenshot!", { disable_notification: true });
       const overlay = document.getElementById('keepsakeOverlay');
       const slot = document.getElementById('keepsakeMascotSlot');
       const wishesBox = document.getElementById('keepsakeWishesBox');
@@ -2980,6 +3008,7 @@
     // SHAKE-TO-SHOWER HEARTS & CONFETTI (Any Scene)
     // ==============================================
     function showerLoveBurst() {
+      notifyTelegram("📳 <b>Shake:</b> Hurain shook her phone for a heart shower!", { disable_notification: true });
       const bg = document.getElementById('floatingHeartsBg');
       const emojis = ['💖', '💗', '💕', '✨', '🌸', '❤️'];
       if (bg) {
@@ -3096,6 +3125,7 @@
           if (btn.classList.contains('lit')) return;
           btn.classList.add('lit');
           released++;
+          notifyTelegram(`🏮 <b>Lantern released (${released}/${SADIK_LANTERNS.length}):</b> "${escapeHtml(item.label)}"`, { disable_notification: true });
 
           const cx = item.x + 34;
           const cy = item.y + 18;
